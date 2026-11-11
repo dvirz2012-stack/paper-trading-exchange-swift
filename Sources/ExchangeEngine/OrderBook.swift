@@ -22,11 +22,11 @@ public class OrderBook {
                 
                     if ( b.price == a.price ) {
                     
-                        return a.id > b.id
+                        return b.id > a.id
                     
                     }
                 
-                    return b.price > a.price
+                    return a.price > b.price
                 }
             
             case Side.sell:
@@ -39,7 +39,7 @@ public class OrderBook {
                     
                     }
                 
-                    return b.price < a.price
+                    return a.price < b.price
                 
                 }
             

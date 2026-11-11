@@ -9,8 +9,8 @@ import ExchangeEngine
     let book: OrderBook = OrderBook()
     book.addOrder(order: order)
     
-    #expect(book.bids.count == +0)
-    #expect(book.asks.count == 1)
+    #expect(book.bids.count == 1)
+    #expect(book.asks.count == +0)
     
 }
 
