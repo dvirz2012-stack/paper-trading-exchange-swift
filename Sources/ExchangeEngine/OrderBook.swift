@@ -13,8 +13,8 @@ public class OrderBook {
     }
     
     public func addOrder(order: Order) {
-        
-        switch(order.side) {
+    
+        switch (order.side) {
             
             case Side.buy:
                 self.bids.append(order)
