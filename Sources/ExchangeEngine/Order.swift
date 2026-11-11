@@ -1,5 +1,5 @@
-import Synchronization
 import Foundation
+import Synchronization
 
 public enum Side: String {
     
@@ -8,26 +8,24 @@ public enum Side: String {
     
 }
 
-
 @available(macOS 15.0, *)
 public class Order {
     
-    private static let nextId = Atomic<Int>(1)
-    public var id: Int
-    public var side: Side
-    public let quantity: Int
-    public let price: Int
-    public let timestamp: Date
+        private static let nextId = Atomic<Int>(1)
+        public var id: Int
+        public let side: Side
+        public var quantity: Int
+        public let price: Int
+        public var timestamp: Date
     
-    public init (side: Side, price: Int, quantity: Int) {
+    
+        public init (side: Side, quantity: Int, price: Int) {
         
-        self.id = Order.nextId.add(1, ordering: .relaxed).oldValue
-        self.side = side
-        self.quantity = quantity
-        self.price = price
-        self.timestamp = Date.now
+            self.id = Order.nextId.add(1, ordering: .relaxed).oldValue
+            self.side = side
+            self.quantity = quantity
+            self.price = price
+            self.timestamp = Date.now
         
     }
-    
 }
-

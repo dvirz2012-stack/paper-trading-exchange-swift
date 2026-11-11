@@ -1,9 +1,16 @@
+
 @available(macOS 15.0, *)
 public class OrderBook {
     
     public var bids: [Order] = []
     public var asks: [Order] = []
     public var trades: [Trade] = []
+    
+    public init () {
+        
+        
+        
+    }
     
     public func addOrder(order: Order) {
         
@@ -12,30 +19,33 @@ public class OrderBook {
             case Side.buy:
                 self.bids.append(order)
                 self.bids.sort { a, b in
-                    if a.price == b.price {
-                    
-                        return a.id < b.id
-                    
-                    }
                 
-                    return a.price > b.price
-                
-                }
-            
-            case Side.sell:
-                self.asks.append(order)
-                self.asks.sort {a, b in
-            
-                    if a.price == b.price {
+                    if ( b.price == a.price ) {
                     
                         return a.id > b.id
                     
                     }
                 
-                    return a.price < b.price
+                    return b.price > a.price
+                }
+            
+            case Side.sell:
+                self.asks.append(order)
+                self.asks.sort { a, b in
+            
+                    if (b.price == a.price) {
+                    
+                        return a.id < b.id
+                    
+                    }
+                
+                    return b.price < a.price
                 
                 }
+            
         }
+        
+        self.match()
         
     }
     
@@ -44,8 +54,13 @@ public class OrderBook {
         while (self.bids.count != 0 && self.asks.count != 0 && self.bids[0].price >= self.asks[0].price) {
             
             let orderToRemove: Int = min(self.bids[0].quantity, self.asks[0].quantity)
+            
             let trade: Trade = Trade(buyOrderId: self.bids[0].id, sellOrderId: self.asks[0].id, price: self.bids[0].id < self.asks[0].id ? self.bids[0].price : self.asks[0].price, quantity: orderToRemove)
+            
             self.trades.append(trade)
+            
+            self.bids[0].quantity -= orderToRemove
+            self.asks[0].quantity -= orderToRemove
             
             if (self.bids[0].quantity == 0) {
                 
@@ -55,9 +70,10 @@ public class OrderBook {
             
             if (self.asks[0].quantity == 0) {
                 
-                self.asks.remove(at: 0)
                 
+                self.asks.remove(at: 0)
             }
+            
             
         }
         
@@ -88,7 +104,7 @@ public class OrderBook {
         }
         
         return false
-        
+ 
     }
     
 }
