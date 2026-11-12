@@ -8,6 +8,13 @@ public enum Side: String {
     
 }
 
+public enum Err: Error {
+    
+    case priceError
+    case quantityError
+    
+}
+
 @available(macOS 15.0, *)
 public class Order {
     
@@ -19,13 +26,25 @@ public class Order {
         public var timestamp: Date
     
     
-        public init (side: Side, quantity: Int, price: Int) {
+        public init (side: Side, quantity: Int, price: Int) throws {
         
             self.id = Order.nextId.add(1, ordering: .relaxed).oldValue
             self.side = side
+            if (quantity <= 0){
+                
+                print("cannot process an order with this amount of units.")
+                throw Err.quantityError
+                
+            }
             self.quantity = quantity
+            if (price <= 0){
+                
+                print("cannot process an order with this price.")
+                throw Err.priceError
+                
+            }
             self.price = price
             self.timestamp = Date.now
-        
+         
     }
 }
