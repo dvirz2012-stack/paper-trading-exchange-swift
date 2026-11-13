@@ -8,7 +8,7 @@ public enum Side: String {
     
 }
 
-public enum Err: Error {
+public enum OrderErrors: Error {
     
     case priceError
     case quantityError
@@ -28,23 +28,21 @@ public class Order {
     
         public init (side: Side, quantity: Int, price: Int) throws {
         
-            self.id = Order.nextId.add(1, ordering: .relaxed).oldValue
             self.side = side
             if (quantity <= 0){
                 
-                print("cannot process an order with this amount of units.")
-                throw Err.quantityError
+                throw OrderErrors.quantityError
                 
             }
             self.quantity = quantity
             if (price <= 0){
                 
-                print("cannot process an order with this price.")
-                throw Err.priceError
+                throw OrderErrors.priceError
                 
             }
             self.price = price
             self.timestamp = Date.now
+            self.id = Order.nextId.add(1, ordering: .relaxed).oldValue
          
     }
 }

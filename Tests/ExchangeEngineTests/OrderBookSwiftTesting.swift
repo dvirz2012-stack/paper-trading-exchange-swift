@@ -121,7 +121,7 @@ import ExchangeEngine
 
 @available(macOS 15.0, *)
 
-@Test func `one big order eating two small ones.`() async throws {
+@Test func `one big order eats two small ones.`() async throws {
     
     let book: OrderBook = OrderBook()
     let bigSellOrder: Order = try Order(side: Side.sell, quantity: 10, price: 9000)
@@ -133,6 +133,8 @@ import ExchangeEngine
     book.addOrder(order: smallBuyOrder2)
     
     #expect(book.trades.count == 2)
+    #expect(book.bids.count == 0)
+    #expect(book.asks[0].quantity == 5)
     
 }
 
@@ -148,5 +150,67 @@ import ExchangeEngine
     book.addOrder(order: buyOrder)
     
     #expect(book.trades[0].price == 10150)
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `delete existing order.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let buyOrder: Order = try Order(side: Side.buy, quantity: 5, price: 10000)
+    
+    book.addOrder(order: buyOrder)
+    let cancelRes: Bool = book.cancelOrder(id: buyOrder.id)
+    
+    #expect(cancelRes && book.bids.count == 0)
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `delete an order that doesn't exist.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let cancelRes: Bool = book.cancelOrder(id: 7777777)
+    
+    #expect(cancelRes == false)
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `deleting first order in the list.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let sellOrder1: Order = try Order(side: Side.sell, quantity: 5, price: 10000)
+    let sellOrder2: Order = try Order(side: Side.sell, quantity: 7, price: 10100)
+    let sellOrder3: Order = try Order(side: Side.sell, quantity: 8, price: 10200)
+    
+    book.addOrder(order: sellOrder1)
+    book.addOrder(order: sellOrder2)
+    book.addOrder(order: sellOrder3)
+    
+    book.cancelOrder(id: sellOrder1.id)
+    
+    #expect(book.asks[0].id == sellOrder2.id)
+    #expect(book.asks[1].id == sellOrder3.id)
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `cancelling doesn't delete trades from the past.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let buyOrder: Order = try Order(side: Side.buy, quantity: 5, price: 10000)
+    let sellOrder: Order = try Order(side: Side.sell, quantity: 3, price: 10000)
+    
+    book.addOrder(order: buyOrder)
+    book.addOrder(order: sellOrder)
+    
+    let buyOrderCancellingRes: Bool = book.cancelOrder(id: buyOrder.id)
+    
+    #expect(buyOrderCancellingRes && book.bids.count == 0 && book.trades.count == 1)
     
 }
