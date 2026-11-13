@@ -155,6 +155,14 @@ import ExchangeEngine
 
 @available(macOS 15.0, *)
 
+@Test func `creating an order with quantity of 0 or a negative price.`() async throws {
+        
+    #expect(throws: OrderErrors.quantityError) { try Order(side: Side.buy, quantity: 0, price: 10000) }
+    
+}
+
+@available(macOS 15.0, *)
+
 @Test func `delete existing order.`() async throws {
     
     let book: OrderBook = OrderBook()
@@ -163,7 +171,8 @@ import ExchangeEngine
     book.addOrder(order: buyOrder)
     let cancelRes: Bool = book.cancelOrder(id: buyOrder.id)
     
-    #expect(cancelRes && book.bids.count == 0)
+    #expect(cancelRes)
+    #expect(book.bids.count == 0)
     
 }
 
@@ -193,6 +202,7 @@ import ExchangeEngine
     
     book.cancelOrder(id: sellOrder1.id)
     
+    #expect(book.asks.count == 2)
     #expect(book.asks[0].id == sellOrder2.id)
     #expect(book.asks[1].id == sellOrder3.id)
     
@@ -211,6 +221,9 @@ import ExchangeEngine
     
     let buyOrderCancellingRes: Bool = book.cancelOrder(id: buyOrder.id)
     
-    #expect(buyOrderCancellingRes && book.bids.count == 0 && book.trades.count == 1)
+    #expect(buyOrderCancellingRes)
+    #expect(book.bids.count == 0)
+    #expect(book.trades.count == 1)
+    
     
 }
