@@ -6,6 +6,30 @@ public class OrderBook {
     public var asks: [Order] = []
     public var trades: [Trade] = []
     
+    public var bestBid: Int? {
+        
+        return self.bids.first?.price
+        
+    }
+    
+    public var bestAsk: Int? {
+        
+        return self.asks.first?.price
+        
+    }
+    
+    public var spread: Int? {
+        
+        if let bestAskInSpread = bestAsk, let bestBidInSpread = bestBid {
+            
+            return bestAskInSpread - bestBidInSpread
+            
+        }
+        
+        return nil
+        
+    }
+    
     public init () {
         
         

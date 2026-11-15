@@ -305,3 +305,73 @@ import ExchangeEngine
     #expect(book.asks.count == 0)
     
 }
+
+@available(macOS 15.0, *)
+
+@Test func `if book is empty, bestBid and bestAsk are both nil.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    
+    #expect(book.bestBid == nil)
+    #expect(book.bestAsk == nil)
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `bestBid is the buyer with the highest price, bestAsk is the seller with the lowest price.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let buyOrder1: Order = try Order(side: Side.buy, quantity: 5, price: 10000)
+    let buyOrder2: Order = try Order(side: Side.buy, quantity: 3, price: 9900)
+    
+    let sellOrder1: Order = try Order(side: Side.sell, quantity: 4, price: 10100)
+    let sellOrder2: Order = try Order(side: Side.sell, quantity: 5, price: 10200)
+    
+    book.addOrder(order: buyOrder1)
+    book.addOrder(order: buyOrder2)
+    book.addOrder(order: sellOrder1)
+    book.addOrder(order: sellOrder2)
+    
+    #expect(book.bestBid == buyOrder1.price)
+    #expect(book.bestAsk == sellOrder1.price)
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `if book is empty, spread is nil.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    
+    #expect(book.spread == nil)
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `if book contains only buyers, spread is nil.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let order: Order = try Order(side: Side.buy, quantity: 5, price: 10000, type: OrderType.limit)
+    
+    book.addOrder(order: order)
+    
+    #expect(book.spread == nil)
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `check if both a seller and a buyer exist, then spread exists.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let buyOrder: Order = try Order(side: Side.buy, quantity: 5, price: 10000, type: OrderType.limit)
+    let sellOrder: Order = try Order(side: Side.sell, quantity: 4, price: 10100, type: OrderType.limit)
+    
+    book.addOrder(order: buyOrder)
+    book.addOrder(order: sellOrder)
+    
+    #expect(book.spread == 100)
+    
+}
