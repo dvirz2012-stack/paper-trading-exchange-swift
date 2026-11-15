@@ -47,6 +47,12 @@ public class OrderBook {
         
         self.match()
         
+        if (order.type == OrderType.market && order.quantity != 0){
+            
+            self.cancelOrder(id: order.id)
+            
+        }
+        
     }
     
     public func match() {

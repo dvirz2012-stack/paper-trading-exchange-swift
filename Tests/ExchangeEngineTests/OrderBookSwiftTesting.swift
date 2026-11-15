@@ -157,7 +157,11 @@ import ExchangeEngine
 
 @Test func `creating an order with quantity of 0 or a negative price.`() async throws {
         
-    #expect(throws: OrderErrors.quantityError) { try Order(side: Side.buy, quantity: 0, price: 10000) }
+    #expect(throws: OrderErrors.quantityError) {
+        
+        try Order(side: Side.buy, quantity: 0, price: 10000)
+        
+    }
     
 }
 
@@ -225,5 +229,79 @@ import ExchangeEngine
     #expect(book.bids.count == 0)
     #expect(book.trades.count == 1)
     
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `market buy eats two price levels.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let limitSellOrder1: Order = try Order(side: Side.sell, quantity: 3, price: 10000)
+    let limitSellOrder2: Order = try Order(side: Side.sell, quantity: 4, price: 10100)
+    let marketBuyOrder: Order = try Order(side: Side.buy, quantity: 7, type: OrderType.market)
+    
+    
+    book.addOrder(order: limitSellOrder1)
+    book.addOrder(order: limitSellOrder2)
+    book.addOrder(order: marketBuyOrder)
+    
+    #expect(book.trades.count == 2)
+    #expect(book.bids.count == 0)
+    #expect(book.asks.count == 0)
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `market order against an empty book.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let marketBuyOrder: Order = try Order(side: Side.buy, quantity: 5, type: OrderType.market)
+    
+    book.addOrder(order: marketBuyOrder)
+    
+    #expect(book.bids.count == 0)
+    #expect(book.asks.count == 0)
+    #expect(book.trades.count == 0)
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `market order partially filled.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let limitOrder: Order = try Order(side: Side.sell, quantity: 3, price: 10000, type: OrderType.limit)
+    let marketOrder: Order = try Order(side: Side.buy, quantity: 10, type: OrderType.market)
+
+    book.addOrder(order: limitOrder)
+    book.addOrder(order: marketOrder)
+    
+    #expect(book.bids.count == 0)
+    #expect(book.asks.count == 0)
+    #expect(book.trades[0].quantity == 3)
+}
+
+@available(macOS 15.0, *)
+
+@Test func `market sell order.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let limitBuyOrder1: Order = try Order(side: Side.buy, quantity: 2, price: 10200, type: OrderType.limit)
+    let limitBuyOrder2: Order = try Order(side: Side.buy, quantity: 5, price: 10100, type: OrderType.limit)
+    let marketSellOrder: Order = try Order(side: Side.sell, quantity: 4, type: OrderType.market)
+    
+    book.addOrder(order: limitBuyOrder1)
+    book.addOrder(order: limitBuyOrder2)
+    book.addOrder(order: marketSellOrder)
+    
+    #expect(book.trades[0].quantity == 2)
+    #expect(book.trades[0].price == 10200)
+    
+    #expect(book.trades[1].quantity == 2)
+    #expect(book.trades[1].price == 10100)
+    
+    #expect(book.asks.count == 0)
     
 }

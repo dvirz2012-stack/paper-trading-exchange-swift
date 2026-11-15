@@ -15,6 +15,13 @@ public enum OrderErrors: Error {
     
 }
 
+public enum OrderType {
+    
+    case market
+    case limit
+    
+}
+
 @available(macOS 15.0, *)
 public class Order {
     
@@ -24,23 +31,41 @@ public class Order {
         public var quantity: Int
         public let price: Int
         public var timestamp: Date
+        public let type: OrderType
     
     
-        public init (side: Side, quantity: Int, price: Int) throws {
+    public init (side: Side, quantity: Int, price: Int = 0, type: OrderType = OrderType.limit) throws {
         
             self.side = side
+            self.type = type
             if (quantity <= 0){
                 
                 throw OrderErrors.quantityError
                 
             }
             self.quantity = quantity
-            if (price <= 0){
+            if (price <= 0 && type == OrderType.limit){
                 
                 throw OrderErrors.priceError
                 
             }
-            self.price = price
+            if (type == OrderType.limit){
+                
+                self.price = price
+
+            } else {
+                
+                if (side == Side.buy){
+                    
+                    self.price = Int.max
+                    
+                } else {
+                    
+                    self.price = 1
+                    
+                }
+                
+            }
             self.timestamp = Date.now
             self.id = Order.nextId.add(1, ordering: .relaxed).oldValue
          
