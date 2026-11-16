@@ -375,3 +375,43 @@ import ExchangeEngine
     #expect(book.spread == 100)
     
 }
+
+@available(macOS 15.0, *)
+
+@Test func `a limit order with an incorrect quantity but a correct price.`() async throws {
+    
+    #expect(throws: OrderErrors.quantityError) { try Order(side: Side.buy, quantity: 0, price: 10000)}
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `a limit order with a negative quantity but a correct price.`() async throws {
+    
+    #expect(throws: OrderErrors.quantityError) { try Order(side: Side.buy, quantity: -5, price: 10000) }
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `a limit order with a correct quantity but an incorrect price.`() async throws {
+    
+    #expect(throws: OrderErrors.priceError) { try Order(side: Side.buy, quantity: 5, price: 0) }
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `a limit order with a correct quantity but a negative price.`() async throws {
+    
+    #expect(throws: OrderErrors.priceError) { try Order(side: Side.buy, quantity: 5, price: -100) }
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `a correct order all-around.`() async throws {
+    
+    #expect(throws: Never.self) { try Order(side: Side.buy, quantity: 5, price: 10000) }
+    
+}
