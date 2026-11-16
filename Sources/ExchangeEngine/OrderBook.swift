@@ -30,6 +30,18 @@ public class OrderBook {
         
     }
     
+    public var buyersDepth: [PriceLevel] {
+        
+        return self.createDepth(orders: bids)
+        
+    }
+    
+    public var sellersDepth: [PriceLevel] {
+        
+        return self.createDepth(orders: asks)
+        
+    }
+    
     public init () {
         
         
@@ -135,6 +147,29 @@ public class OrderBook {
         
         return false
  
+    }
+    
+    private func createDepth(orders: [Order]) -> [PriceLevel] {
+        
+        var depths: [PriceLevel] = []
+        
+        for order in orders {
+            
+            if let lastLevel = depths.last, lastLevel.price == order.price {
+                
+                depths[depths.count - 1].quantity += order.quantity
+                depths[depths.count - 1].timesPriceShown += 1
+                
+            } else {
+                
+                depths.append(PriceLevel(price: order.price, quantity: order.quantity, timesPriceShown: 1))
+                
+            }
+                        
+        }
+        
+        return depths
+        
     }
     
 }

@@ -415,3 +415,61 @@ import ExchangeEngine
     #expect(throws: Never.self) { try Order(side: Side.buy, quantity: 5, price: 10000) }
     
 }
+
+@available(macOS 15.0, *)
+
+@Test func `if book is empty, then depths are empty.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    
+    #expect(book.buyersDepth.count == 0)
+    #expect(book.sellersDepth.count == 0)
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `two price levels unite.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let buyOrder1: Order = try Order(side: Side.buy, quantity: 5, price: 10000)
+    let buyOrder2: Order = try Order(side: Side.buy, quantity: 4, price: 10000)
+    let buyOrder3: Order = try Order(side: Side.buy, quantity: 7, price: 10100)
+    
+    book.addOrder(order: buyOrder1)
+    book.addOrder(order: buyOrder2)
+    book.addOrder(order: buyOrder3)
+    
+    #expect(book.buyersDepth.count == 2)
+    
+    #expect(book.buyersDepth[1].timesPriceShown == 2)
+    #expect(book.buyersDepth[1].quantity == 9)
+    #expect(book.buyersDepth[1].price == 10000)
+    
+    #expect(book.buyersDepth[0].timesPriceShown == 1)
+    #expect(book.buyersDepth[0].quantity == 7)
+    #expect(book.buyersDepth[0].price == 10100)
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `sellers depth sorted correctly.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    
+    let sellOrder1: Order = try Order(side: Side.sell, quantity: 5, price: 10000)
+    let sellOrder2: Order = try Order(side: Side.sell, quantity: 3, price: 10200)
+    let sellOrder3: Order = try Order(side: Side.sell, quantity: 2, price: 10100)
+    
+    book.addOrder(order: sellOrder1)
+    book.addOrder(order: sellOrder2)
+    book.addOrder(order: sellOrder3)
+    
+    #expect(book.sellersDepth[0].price == sellOrder1.price)
+    #expect(book.sellersDepth[1].price == sellOrder3.price)
+    #expect(book.sellersDepth[2].price == sellOrder2.price)
+    
+}
+
+
