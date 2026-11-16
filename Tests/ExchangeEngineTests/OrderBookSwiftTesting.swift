@@ -1,4 +1,5 @@
 import Testing
+import Foundation
 import ExchangeEngine
 
 @available(macOS 15.0, *)
@@ -418,58 +419,85 @@ import ExchangeEngine
 
 @available(macOS 15.0, *)
 
-@Test func `if book is empty, then depths are empty.`() async throws {
+@Test func `no trades, no candles.`() async throws {
     
     let book: OrderBook = OrderBook()
+    let candleRes = try book.calculateCandles(candleLength: 60)
     
-    #expect(book.buyersDepth.count == 0)
-    #expect(book.sellersDepth.count == 0)
+    #expect(candleRes.count == 0)
     
 }
 
 @available(macOS 15.0, *)
 
-@Test func `two price levels unite.`() async throws {
+@Test func `three trades unite in the same minute.`() async throws {
     
     let book: OrderBook = OrderBook()
-    let buyOrder1: Order = try Order(side: Side.buy, quantity: 5, price: 10000)
-    let buyOrder2: Order = try Order(side: Side.buy, quantity: 4, price: 10000)
-    let buyOrder3: Order = try Order(side: Side.buy, quantity: 7, price: 10100)
+    let trade1: Trade = Trade(buyOrderId: 1, sellOrderId: 2, price: 10000, quantity: 5, timestamp: Date(timeIntervalSince1970: 1794830400))
+    let trade2: Trade = Trade(buyOrderId: 3, sellOrderId: 4, price: 10100, quantity: 7, timestamp: Date(timeIntervalSince1970: 1794830410))
+    let trade3: Trade = Trade(buyOrderId: 5, sellOrderId: 6, price: 10050, quantity: 9, timestamp: Date(timeIntervalSince1970: 1794830420))
     
-    book.addOrder(order: buyOrder1)
-    book.addOrder(order: buyOrder2)
-    book.addOrder(order: buyOrder3)
+    book.trades.append(trade1)
+    book.trades.append(trade2)
+    book.trades.append(trade3)
     
-    #expect(book.buyersDepth.count == 2)
+    let res: [Candle] = try book.calculateCandles(candleLength: 60)
     
-    #expect(book.buyersDepth[1].timesPriceShown == 2)
-    #expect(book.buyersDepth[1].quantity == 9)
-    #expect(book.buyersDepth[1].price == 10000)
-    
-    #expect(book.buyersDepth[0].timesPriceShown == 1)
-    #expect(book.buyersDepth[0].quantity == 7)
-    #expect(book.buyersDepth[0].price == 10100)
+    #expect(res.count == 1)
+    #expect(res[0].volume == 21)
+    #expect(res[0].high == trade2.price)
+    #expect(res[0].low == trade1.price)
+    #expect(res[0].close == trade3.price)
+    #expect(res[0].open == trade1.price)
+    #expect(res[0].seconds == 1794830400)
     
 }
 
 @available(macOS 15.0, *)
 
-@Test func `sellers depth sorted correctly.`() async throws {
+@Test func `two minutes, two candles.`() async throws {
     
     let book: OrderBook = OrderBook()
+    let tradeMin1: Trade = Trade(buyOrderId: 1, sellOrderId: 2, price: 10000, quantity: 5, timestamp: Date(timeIntervalSince1970: 1794830430))
+    let tradeMin2: Trade = Trade(buyOrderId: 3, sellOrderId: 4, price: 10100, quantity: 7, timestamp: Date(timeIntervalSince1970: 1794830490))
     
-    let sellOrder1: Order = try Order(side: Side.sell, quantity: 5, price: 10000)
-    let sellOrder2: Order = try Order(side: Side.sell, quantity: 3, price: 10200)
-    let sellOrder3: Order = try Order(side: Side.sell, quantity: 2, price: 10100)
+    book.trades.append(tradeMin1)
+    book.trades.append(tradeMin2)
     
-    book.addOrder(order: sellOrder1)
-    book.addOrder(order: sellOrder2)
-    book.addOrder(order: sellOrder3)
+    let candleRes: [Candle] = try book.calculateCandles(candleLength: 60)
     
-    #expect(book.sellersDepth[0].price == sellOrder1.price)
-    #expect(book.sellersDepth[1].price == sellOrder3.price)
-    #expect(book.sellersDepth[2].price == sellOrder2.price)
+    #expect(candleRes.count == 2)
+    #expect(candleRes[0].seconds == 1794830400)
+    #expect(candleRes[1].seconds == 1794830460)
     
 }
 
+@available(macOS 15.0, *)
 
+@Test func `incorrect candle length.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let tradeMin1: Trade = Trade(buyOrderId: 1, sellOrderId: 2, price: 10000, quantity: 5, timestamp: Date(timeIntervalSince1970: 1794830430))
+    let tradeMin2: Trade = Trade(buyOrderId: 3, sellOrderId: 4, price: 10100, quantity: 7, timestamp: Date(timeIntervalSince1970: 1794830490))
+    
+    book.trades.append(tradeMin1)
+    book.trades.append(tradeMin2)
+    
+    #expect(throws: CandleErrors.candleLengthZero) { try  book.calculateCandles(candleLength: 0) }
+    
+}
+
+@available(macOS 15.0, *)
+
+@Test func `negative candle length.`() async throws {
+    
+    let book: OrderBook = OrderBook()
+    let tradeMin1: Trade = Trade(buyOrderId: 1, sellOrderId: 2, price: 10000, quantity: 5, timestamp: Date(timeIntervalSince1970: 1794830430))
+    let tradeMin2: Trade = Trade(buyOrderId: 3, sellOrderId: 4, price: 10100, quantity: 7, timestamp: Date(timeIntervalSince1970: 1794830490))
+    
+    book.trades.append(tradeMin1)
+    book.trades.append(tradeMin2)
+    
+    #expect(throws: CandleErrors.candleLengthNegative) { try book.calculateCandles(candleLength: -70) }
+    
+}

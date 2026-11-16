@@ -1,5 +1,15 @@
+import Foundation
+import Synchronization
+
+public enum CandleErrors: Error {
+    
+    case candleLengthZero
+    case candleLengthNegative
+    
+}
 
 @available(macOS 15.0, *)
+
 public class OrderBook {
     
     public var bids: [Order] = []
@@ -147,6 +157,49 @@ public class OrderBook {
         
         return false
  
+    }
+    
+    public func calculateCandles(candleLength: Int) throws -> [Candle] {
+        
+        if (candleLength == 0) {
+            
+            throw CandleErrors.candleLengthZero
+            
+        }
+        
+        if (candleLength < 0) {
+            
+            throw CandleErrors.candleLengthNegative
+            
+        }
+        
+        var candles: [Candle] = []
+        
+        for trade in trades {
+            
+            let seconds: Double = trade.timestamp.timeIntervalSince1970
+            let intSecs: Int = Int(seconds) / candleLength * candleLength
+            if let lastCandle = candles.last, lastCandle.seconds == intSecs {
+                
+                candles[candles.count - 1].high = (lastCandle.high > trade.price) ? lastCandle.high : trade.price
+                
+                candles[candles.count - 1].low = (lastCandle.low < trade.price) ? lastCandle.low : trade.price
+                
+                candles[candles.count - 1].close = trade.price
+                
+                candles[candles.count - 1].volume += trade.quantity
+                
+                    
+            } else {
+                
+                candles.append(Candle(high: trade.price, low: trade.price, close: trade.price, volume: trade.quantity, seconds: intSecs, open: trade.price))
+                
+            }
+            
+        }
+        
+        return candles
+        
     }
     
     private func createDepth(orders: [Order]) -> [PriceLevel] {
