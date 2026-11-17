@@ -4,6 +4,11 @@ import ExchangeEngine
 struct ContentView: View {
     
     let book: OrderBook = (try? runEngine()) ?? OrderBook()
+    var maxQuantity: Int {
+        
+        (book.buyersDepth + book.sellersDepth).map { $0.quantity}.max() ?? 1
+        
+    }
     
     static func runEngine() throws -> OrderBook {
         
@@ -25,72 +30,96 @@ struct ContentView: View {
     var body: some View {
         
         VStack(spacing: 12) {
-            Text("Order Book")
-                .font(.title)
-            if let bid = book.bestBid {
-                
-                Text("Best bid: \(bid)")
-                    .foregroundStyle(.green)
-                
-            } else {
-                
-                Text("Best bid: -")
-                
-            }
+            Text("BookWorm")
+                .font(.largeTitle)
+                .bold()
+            Text("Best at making you understand.")
+                .font(.subheadline)
+                .foregroundStyle(.gray)
             
-            if let ask = book.bestAsk {
+            Divider()
+            
+            HStack {
                 
-                Text("Best ask: \(ask)")
-                    .foregroundStyle(.red)
-                
-            } else {
-                
-                Text("Best ask: -")
+                Text("Price")
+                    .foregroundStyle(.gray)
+                    .bold()
+                Spacer()
+                Text("Size")
+                    .foregroundStyle(.gray)
+                    .bold()
                 
             }
             
             ForEach(book.sellersDepth.reversed(), id: \.price) { level in
                 
-                HStack {
-                    
-                    Text(" \(level.price)")
-                        .foregroundStyle(.red)
-                    Spacer()
-                    Text("\(level.quantity)")
-                        .foregroundStyle(.red)
-                    
-                }
-                
+                LevelRow(color: .red, level: level, maximum: maxQuantity)
+
             }
-            
+            Divider()
             if let spread = book.spread {
                 
-                Text("Spread: \(spread)")
+                Text("Spread: \(Double(spread) / 100, format: .number.precision(.fractionLength(2)))")
+                    .foregroundStyle(.gray)
                 
             } else {
                 
                 Text("Spread: -")
                 
             }
+            Divider()
             
             ForEach(book.buyersDepth, id: \.price) { level in
-            
-                HStack {
-                    
-                    Text("\(level.price)")
-                        .foregroundStyle(.green)
-                    Spacer()
-                    Text("\(level.quantity)")
-                        .foregroundStyle(.green)
-                }
+                
+                LevelRow(color: .green, level: level, maximum: maxQuantity)
                 
             }
+            
+            Spacer()
             
         }
         .padding()
         .frame(minWidth: 300, minHeight: 200)
+
+    }
+}
+
+struct LevelRow: View {
+    
+    let color: Color
+    let level: PriceLevel
+    let maximum: Int
+    var fraction: Double {
+        
+        Double(level.quantity) / Double(maximum)
         
     }
+    
+    var body: some View {
+        
+        HStack {
+            
+            Text("\(Double(level.price) / 100, format: .number.precision(.fractionLength(2)))")
+            Spacer()
+            Text("\(level.quantity)")
+            
+        }
+        .foregroundStyle(color)
+        .monospacedDigit()
+        .background {
+            
+            GeometryReader { geo in
+                
+                Rectangle()
+                    .fill(color.opacity(0.15))
+                    .frame(width: geo.size.width * fraction)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                
+            }
+            
+        }
+    }
+    
 }
 
 #Preview {
