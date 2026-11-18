@@ -1,7 +1,42 @@
 import SwiftUI
 import ExchangeEngine
 
+extension View {
+    
+    func card() -> some View {
+        
+        self
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+            .background(Color.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 16))
+    }
+    
+}
+
 struct ContentView: View {
+    
+    @AppStorage("name") var name: String = ""
+    
+    var greeting: String {
+        
+        let hour = Calendar.current.component(.hour, from: Date())
+
+        switch hour {
+            
+            case 6..<12: return "Good Morning, " + name + "!"
+
+            case 12: return "Good Noon, " + name + "!"
+            
+            case 13..<17: return "Good Afternoon, " + name + "!"
+            
+            case 17..<22: return "Good Evening, " + name + "!"
+            
+            default: return "Good Night, " + name + "!"
+
+            
+        }
+        
+    }
     
     let book: OrderBook = (try? runEngine()) ?? OrderBook()
     var maxQuantity: Int {
@@ -26,100 +61,104 @@ struct ContentView: View {
         return book
     }
     
-    
     var body: some View {
         
-        VStack(spacing: 12) {
-            Text("BookWorm")
-                .font(.largeTitle)
-                .bold()
-            Text("Best at making you understand.")
-                .font(.subheadline)
-                .foregroundStyle(.gray)
+        TabView {
             
-            Divider()
-            
-            HStack {
+            Tab("Home", systemImage: "house") {
                 
-                Text("Price")
-                    .foregroundStyle(.gray)
-                    .bold()
-                Spacer()
-                Text("Size")
-                    .foregroundStyle(.gray)
-                    .bold()
-                
-            }
-            
-            ForEach(book.sellersDepth.reversed(), id: \.price) { level in
-                
-                LevelRow(color: .red, level: level, maximum: maxQuantity)
+                VStack(alignment: .leading, spacing: 16) {
+
+                    Button("The cool programmer :)") {
+                        
+                        name = "Dvir"
+                        
+                    }
+                    Text(greeting)
+                        .font(.largeTitle)
+                        .bold()
+                    Divider()
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Your Portfolio")
+                            .font(.subheadline)
+                            .foregroundStyle(.gray)
+                            .bold()
+                        Text(10000, format: .currency(code: "USD"))
+                            .font(.largeTitle)
+                            .bold()
+                        Text("▲ +10.00% this week")
+                            .font(.caption)
+                            .foregroundStyle(.green)
+                            .bold()
+
+                    }
+                    .card()
+                    Divider()
+                    HStack(spacing: 16) {
+                        
+                        VStack(alignment: .leading, spacing: 16) {
+                            
+                            Text("Best Bid")
+                                .font(.subheadline)
+                                .foregroundStyle(.gray)
+                                .bold()
+                            
+                            if let bid = book.bestBid {
+                                
+                                Text(Double(bid) / 100, format: .currency(code: "USD"))
+                                    .font(.title2)
+                                    .bold()
+                                    .foregroundStyle(.green)
+                                
+                            } else {
+                                
+                                Text("-")
+                                    .font(.title2)
+                                    .bold()
+                                    .foregroundStyle(.gray)
+                                
+                            }
+                        
+                        }
+                        .card()
+                        VStack(alignment: .leading, spacing: 16) {
+                            
+                            Text("Best Ask")
+                                .font(.subheadline)
+                                .foregroundStyle(.gray)
+                                .bold()
+                            
+                            if let ask = book.bestAsk {
+                                
+
+                                Text(Double(ask) / 100, format: .currency(code: "USD"))
+                                    .font(.title2)
+                                    .bold()
+                                    .foregroundStyle(.red)
+                            
+                            } else {
+                                
+                               Text("-")
+                                    .font(.title2)
+                                    .bold()
+                                    .foregroundStyle(.gray)
+                                
+                            }
+                            
+                        }
+                        .card()
+                    }
+                    Spacer()
+                    
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
 
             }
-            Divider()
-            if let spread = book.spread {
-                
-                Text("Spread: \(Double(spread) / 100, format: .number.precision(.fractionLength(2)))")
-                    .foregroundStyle(.gray)
-                
-            } else {
-                
-                Text("Spread: -")
-                
-            }
-            Divider()
-            
-            ForEach(book.buyersDepth, id: \.price) { level in
-                
-                LevelRow(color: .green, level: level, maximum: maxQuantity)
-                
-            }
-            
-            Spacer()
             
         }
-        .padding()
-        .frame(minWidth: 300, minHeight: 200)
-
+            
     }
-}
-
-struct LevelRow: View {
-    
-    let color: Color
-    let level: PriceLevel
-    let maximum: Int
-    var fraction: Double {
-        
-        Double(level.quantity) / Double(maximum)
-        
-    }
-    
-    var body: some View {
-        
-        HStack {
-            
-            Text("\(Double(level.price) / 100, format: .number.precision(.fractionLength(2)))")
-            Spacer()
-            Text("\(level.quantity)")
-            
-        }
-        .foregroundStyle(color)
-        .monospacedDigit()
-        .background {
-            
-            GeometryReader { geo in
-                
-                Rectangle()
-                    .fill(color.opacity(0.15))
-                    .frame(width: geo.size.width * fraction)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                
-            }
-            
-        }
-    }
-    
 }
 
 #Preview {

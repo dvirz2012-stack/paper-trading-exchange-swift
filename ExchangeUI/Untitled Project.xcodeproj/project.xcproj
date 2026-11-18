@@ -17,7 +17,7 @@
     },
   ],
   "files": [
-    { "kind": "folder", "path": "Untitled Project", "target-membership": [ "Untitled Project" ] },
+    { "kind": "folder", "path": "/Users/family/Documents/ExchangeEngine/ExchangeUI", "target-membership": [ "Untitled Project" ] },
     {
       "kind": "group",
       "name": "Products",
