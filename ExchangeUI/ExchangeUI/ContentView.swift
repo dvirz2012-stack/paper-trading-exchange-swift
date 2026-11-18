@@ -15,7 +15,7 @@ extension View {
 
 struct ContentView: View {
     
-    @AppStorage("name") var name: String = ""
+    @AppStorage("name") var name: String = ":)"
     
     var greeting: String {
         
