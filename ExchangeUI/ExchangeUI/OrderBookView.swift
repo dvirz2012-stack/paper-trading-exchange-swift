@@ -28,10 +28,7 @@ struct OrderBookView: View {
     
     
     var body: some View {
-        
-        TabView {
-            
-            Tab("Order Book", systemImage: "clock") {
+
                 VStack(spacing: 12) {
                     Text("BookWorm")
                         .font(.largeTitle)
@@ -83,8 +80,6 @@ struct OrderBookView: View {
                 }
                 .padding()
                 .frame(minWidth: 300, minHeight: 200)
-            }
-        }
             
     }
 }

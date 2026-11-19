@@ -1,18 +1,6 @@
 import SwiftUI
 import ExchangeEngine
 
-extension View {
-    
-    func card() -> some View {
-        
-        self
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-            .background(Color.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 16))
-    }
-    
-}
-
 struct ContentView: View {
     
     @AppStorage("name") var name: String = ":)"
@@ -67,93 +55,13 @@ struct ContentView: View {
             
             Tab("Home", systemImage: "house") {
                 
-                VStack(alignment: .leading, spacing: 16) {
-
-                    Button("The cool programmer :)") {
-                        
-                        name = "Dvir"
-                        
-                    }
-                    Text(greeting)
-                        .font(.largeTitle)
-                        .bold()
-                    Divider()
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Your Portfolio")
-                            .font(.subheadline)
-                            .foregroundStyle(.gray)
-                            .bold()
-                        Text(10000, format: .currency(code: "USD"))
-                            .font(.largeTitle)
-                            .bold()
-                        Text("▲ +10.00% this week")
-                            .font(.caption)
-                            .foregroundStyle(.green)
-                            .bold()
-
-                    }
-                    .card()
-                    Divider()
-                    HStack(spacing: 16) {
-                        
-                        VStack(alignment: .leading, spacing: 16) {
-                            
-                            Text("Best Bid")
-                                .font(.subheadline)
-                                .foregroundStyle(.gray)
-                                .bold()
-                            
-                            if let bid = book.bestBid {
-                                
-                                Text(Double(bid) / 100, format: .currency(code: "USD"))
-                                    .font(.title2)
-                                    .bold()
-                                    .foregroundStyle(.green)
-                                
-                            } else {
-                                
-                                Text("-")
-                                    .font(.title2)
-                                    .bold()
-                                    .foregroundStyle(.gray)
-                                
-                            }
-                        
-                        }
-                        .card()
-                        VStack(alignment: .leading, spacing: 16) {
-                            
-                            Text("Best Ask")
-                                .font(.subheadline)
-                                .foregroundStyle(.gray)
-                                .bold()
-                            
-                            if let ask = book.bestAsk {
-                                
-
-                                Text(Double(ask) / 100, format: .currency(code: "USD"))
-                                    .font(.title2)
-                                    .bold()
-                                    .foregroundStyle(.red)
-                            
-                            } else {
-                                
-                               Text("-")
-                                    .font(.title2)
-                                    .bold()
-                                    .foregroundStyle(.gray)
-                                
-                            }
-                            
-                        }
-                        .card()
-                    }
-                    Spacer()
-                    
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
-
+                HomeView()
+                
+            }
+            Tab("Order Book", systemImage: "clock") {
+                
+                OrderBookView()
+                
             }
             
         }
