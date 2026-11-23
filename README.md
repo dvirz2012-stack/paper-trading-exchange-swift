@@ -169,6 +169,6 @@ Ideas I'm working toward, not promises (yet):
 
 ## About
 
-Built by **Dvir** as a way to really understand how exchanges work, by building one instead of just reading about it.
+Built by **Dvir** as a way to really understand how exchanges work, by building one instead of just reading about it :)
 
 If you found a bug, the engine probably has a test for it already. If it doesn't, open an issue and I'll add one. :)
