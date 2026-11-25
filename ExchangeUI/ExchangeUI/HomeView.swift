@@ -2,197 +2,103 @@ import SwiftUI
 import ExchangeEngine
 
 public enum AppTab {
-    
-    case home, learn
-    
-}
 
-extension View {
-    
-    func card() -> some View {
-        
-        self
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-            .background(Color.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 16))
-    }
-    
+    case home, learn
+
 }
 
 struct HomeView: View {
     
-    @State private var selectedTab: AppTab = .home
-    
-    @AppStorage("name") var name: String = ":)"
-    
     var greeting: String {
         
         let hour = Calendar.current.component(.hour, from: Date())
+        
         switch hour {
             
-            case 6..<12: return "Good Morning, " + name + "!"
-
-            case 12: return "Good Noon, " + name + "!"
-            
-            case 13..<17: return "Good Afternoon, " + name + "!"
-            
-            case 17..<22: return "Good Evening, " + name + "!"
-            
-            default: return "Good Night, " + name + "!"
-
+            case 7..<12: return "Good Morning, "
+            case 12..<17: return "Good Afternoon, "
+            case 17..<20: return "Good Evening, "
+            case 5..<7: return "Here's our early bird, "
+            default: return "Here's our night owl, "
             
         }
         
     }
     
-    let book: OrderBook = (try? runEngine()) ?? OrderBook()
-    var maxQuantity: Int {
-        
-        (book.buyersDepth + book.sellersDepth).map { $0.quantity}.max() ?? 1
-        
-    }
-    
-    static func runEngine() throws -> OrderBook {
-        
-        let book: OrderBook = OrderBook()
-        let buyOrder1: Order = try Order(side: Side.buy, quantity: 5, price: 10000, type: OrderType.limit)
-        let buyOrder2: Order = try Order(side: Side.buy, quantity: 4, price: 10100, type: OrderType.limit)
-        let sellOrder1: Order = try Order(side: Side.sell, quantity: 5, price: 10200, type: OrderType.limit)
-        let sellOrder2: Order = try Order(side: Side.sell, quantity: 4, price: 10300, type: OrderType.limit)
-        
-        book.addOrder(order: buyOrder1)
-        book.addOrder(order: buyOrder2)
-        book.addOrder(order: sellOrder1)
-        book.addOrder(order: sellOrder2)
-       
-        return book
-    }
-    
+    @AppStorage("name") var name: String = "Dvir"
     
     var body: some View {
-        
-        VStack(alignment: .leading, spacing: 16) {
-
-            Button("The cool programmer :)") {
+            
+        ScrollView {
+            
+            VStack(alignment: .leading, spacing: 20) {
                 
-                name = "Dvir"
-                
-            }
-            Text(greeting)
-                .font(.largeTitle)
-                .bold()
-            Divider()
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Your Portfolio")
-                    .font(.subheadline)
-                    .foregroundStyle(.gray)
-                    .bold()
-                Text(10000, format: .currency(code: "USD"))
-                    .font(.largeTitle)
-                    .bold()
-                Text("▲ +10.00% this week")
-                    .font(.caption)
-                    .foregroundStyle(.green)
-                    .bold()
-
-            }
-            .card()
-            Divider()
-            HStack(spacing: 16) {
-                
-                VStack(alignment: .leading, spacing: 16) {
+                HStack {
                     
-                    Text("Best Bid")
-                        .font(.subheadline)
-                        .foregroundStyle(.gray)
-                        .bold()
-                    
-                    if let bid = book.bestBid {
+                    VStack(alignment: .leading, spacing: 4) {
                         
-                        Text(Double(bid) / 100, format: .currency(code: "USD"))
-                            .font(.title2)
+                        Text(greeting)
+                            .fontDesign(.rounded)
                             .bold()
-                            .foregroundStyle(.green)
-                        
-                    } else {
-                        
-                        Text("-")
-                            .font(.title2)
-                            .bold()
+                            .font(.title3)
                             .foregroundStyle(.gray)
-                        
+                        Text("\(name)!")
+                            .fontDesign(.rounded)
+                            .bold()
+                            .font(.largeTitle)
+                    
                     }
-                
+                    Spacer()
+                    Circle()
+                        .fill(Color.mist)
+                        .frame(width: 52, height: 52)
+                        .overlay {
+                            
+                            Text("🐛")
+                                .font(.largeTitle)
+                                .fontDesign(.rounded)
+                                
+                            
+                        }
+                    
                 }
-                .card()
-                VStack(alignment: .leading, spacing: 16) {
+                
+                Divider()
+                
+                VStack(alignment: .leading, spacing: 20) {
                     
-                    Text("Best Ask")
-                        .font(.subheadline)
-                        .foregroundStyle(.gray)
+                    Text("Your Portfolio")
+                        .fontDesign(.rounded)
+                        .font(.title2)
                         .bold()
+                        .foregroundStyle(.gray)
+                    Text(10000, format: .currency(code: "USD"))
+                        .fontDesign(.rounded)
+                        .font(.largeTitle)
+                        .bold()
+                        .monospacedDigit()
+                        .foregroundStyle(Color.softGreen)
+                    Text("▲ 10.00%  this week")
+                        .fontDesign(.rounded)
+                        .font(.title3)
+                        .bold()
+                        .foregroundStyle(Color.softGreen)
                     
-                    if let ask = book.bestAsk {
-                        
-
-                        Text(Double(ask) / 100, format: .currency(code: "USD"))
-                            .font(.title2)
-                            .bold()
-                            .foregroundStyle(.red)
-                    
-                    } else {
-                        
-                       Text("-")
-                            .font(.title2)
-                            .bold()
-                            .foregroundStyle(.gray)
-                        
-                    }
                     
                 }
                 .card()
                 
             }
-            
-            Divider()
-            
-            VStack(alignment: .leading, spacing: 16) {
-                
-                Text("Word Of The Day")
-                    .font(.largeTitle)
-                    .bold()
-                Text("A spread is the gap between two orders made, between the highest bid and the lowest ask.")
-                    .font(.subheadline)
-                    .bold()
-                    .card()
-                
-            }
-            
-            Divider()
-            
-            VStack(alignment: .leading, spacing: 16) {
-                
-                Text("Let's start learning!")
-                    .font(.largeTitle)
-                    .bold()
-                multilineTextAlignment(.center)
-                Button("Start learning 📚") {
-                     selectedTab = .learn
-                 }
-                 .buttonStyle(.borderedProminent)
-                
-            }
-            
-            Spacer()
+            .padding(20)
             
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-            
+        .fontDesign(.rounded)
+        .background(Color.cloud)
+        
     }
+    
+}
 
 #Preview {
-    
     HomeView()
-    
 }

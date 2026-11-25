@@ -3,126 +3,70 @@ import ExchangeEngine
 
 struct OrderBookView: View {
     
-    let book: OrderBook = (try? runEngine()) ?? OrderBook()
+    let book: OrderBook
+    
     var maxQuantity: Int {
         
-        (book.buyersDepth + book.sellersDepth).map { $0.quantity}.max() ?? 1
+        (book.sellersDepth + book.buyersDepth).map { $0.quantity }.max() ?? 1
         
     }
     
-    static func runEngine() throws -> OrderBook {
+    var midPrice: Double? {
         
-        let book: OrderBook = OrderBook()
-        let buyOrder1: Order = try Order(side: Side.buy, quantity: 5, price: 10000, type: OrderType.limit)
-        let buyOrder2: Order = try Order(side: Side.buy, quantity: 4, price: 10100, type: OrderType.limit)
-        let sellOrder1: Order = try Order(side: Side.sell, quantity: 5, price: 10200, type: OrderType.limit)
-        let sellOrder2: Order = try Order(side: Side.sell, quantity: 4, price: 10300, type: OrderType.limit)
+        if let bid = book.bestBid, let ask = book.bestAsk {
+            
+            return Double((ask + bid)) / 200
+            
+        }
         
-        book.addOrder(order: buyOrder1)
-        book.addOrder(order: buyOrder2)
-        book.addOrder(order: sellOrder1)
-        book.addOrder(order: sellOrder2)
-       
-        return book
+        return nil
+        
     }
-    
     
     var body: some View {
-
-                VStack(spacing: 12) {
-                    Text("BookWorm")
+        
+        ScrollView {
+            
+            VStack(alignment: .leading, spacing: 20) {
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    
+                    Text("Order Book")
                         .font(.largeTitle)
                         .bold()
-                    Text("Best at making you understand.")
+                    Text("BWM / USD")
                         .font(.subheadline)
                         .foregroundStyle(.gray)
-                    
-                    Divider()
-                    
-                    HStack {
-                        
-                        Text("Price")
-                            .foregroundStyle(.gray)
-                            .bold()
-                        Spacer()
-                        Text("Size")
-                            .foregroundStyle(.gray)
-                            .bold()
-                        
-                    }
-                    
-                    ForEach(book.sellersDepth.reversed(), id: \.price) { level in
-                        
-                        LevelRow(color: .red, level: level, maximum: maxQuantity)
-                        
-                    }
-                    Divider()
-                    if let spread = book.spread {
-                        
-                        Text("Spread: \(Double(spread) / 100, format: .number.precision(.fractionLength(2)))")
-                            .foregroundStyle(.gray)
-                        
-                    } else {
-                        
-                        Text("Spread: -")
-                        
-                    }
-                    Divider()
-                    
-                    ForEach(book.buyersDepth, id: \.price) { level in
-                        
-                        LevelRow(color: .green, level: level, maximum: maxQuantity)
-                        
-                    }
-                    
-                    Spacer()
+                        .bold()
                     
                 }
-                .padding()
-                .frame(minWidth: 300, minHeight: 200)
-            
-    }
-}
-
-struct LevelRow: View {
-    
-    let color: Color
-    let level: PriceLevel
-    let maximum: Int
-    var fraction: Double {
-        
-        Double(level.quantity) / Double(maximum)
-        
-    }
-    
-    var body: some View {
-        
-        HStack {
-            
-            Text("\(Double(level.price) / 100, format: .number.precision(.fractionLength(2)))")
-            Spacer()
-            Text("\(level.quantity)")
-            
-        }
-        .foregroundStyle(color)
-        .monospacedDigit()
-        .background {
-            
-            GeometryReader { geo in
                 
-                Rectangle()
-                    .fill(color.opacity(0.15))
-                    .frame(width: geo.size.width * fraction)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                HStack {
+                    
+                    if let price = midPrice {
+                        
+                        Text(midPrice ?? 0, format: .currency(code: "USD"))
+                            .monospacedDigit()
+                            .bold()
+                        
+                    }
+                    
+                }
                 
             }
+            .padding(20)
             
         }
+        .fontDesign(.rounded)
+        .background(Color.cloud)
+        
     }
     
 }
 
 #Preview {
-    ContentView()
+    
+    OrderBookView(book: (try? OrderBook.sample()) ?? OrderBook())
+    
 }
 
