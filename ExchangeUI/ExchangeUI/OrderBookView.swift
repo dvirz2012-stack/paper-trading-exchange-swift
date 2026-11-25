@@ -41,17 +41,62 @@ struct OrderBookView: View {
                     
                 }
                 
-                HStack {
+                VStack(alignment: .leading, spacing: 8) {
                     
-                    if let price = midPrice {
+                    Text("Mid Price")
+                        .font(.title2)
+                        .bold()
+                        .foregroundStyle(.gray)
+                    
+                    HStack {
                         
-                        Text(midPrice ?? 0, format: .currency(code: "USD"))
-                            .monospacedDigit()
-                            .bold()
+                        if let price = midPrice {
+                            
+                            Text(midPrice ?? 0, format: .currency(code: "USD"))
+                                .font(.largeTitle)
+                                .monospacedDigit()
+                                .bold()
+                            
+                        } else {
+                            
+                            Text("-")
+                                .font(.largeTitle)
+                                .monospacedDigit()
+                                .bold()
+                            
+                        }
+                        
+                        Spacer()
                         
                     }
                     
+                    Text("Spread")
+                        .font(.title2)
+                        .bold()
+                        .foregroundStyle(.gray)
+                    
+                    HStack {
+                        
+                        if let spread = book.spread {
+                            
+                            Text(Double(spread) / 100, format: .currency(code: "USD"))
+                                .font(.largeTitle)
+                                .monospacedDigit()
+                                .bold()
+                            
+                        } else {
+                            
+                            Text("-")
+                                .font(.largeTitle)
+                                .monospacedDigit()
+                                .bold()
+                            
+                        }
+                        
+                    }
+                
                 }
+                .card()
                 
             }
             .padding(20)
